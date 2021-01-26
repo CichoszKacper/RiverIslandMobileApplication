@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".DetailActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_weight="0"
+        android:layout_height="wrap_content"
+        android:id="@+id/titleText"
+        android:text="R I V E R   I S L A N D"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:gravity="center_horizontal" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/productImageDetail"
+        android:layout_below="@+id/titleText"
+        android:adjustViewBounds="true"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="20dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:id="@+id/productNameDetail"
+        android:layout_below="@+id/productImageDetail"
+        android:layout_margin="0dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="40dp"
+        android:textStyle="bold"
+        android:gravity="top|center_horizontal"
+        android:textColor="@color/black"
+        android:id="@+id/productPriceDetail"
+        android:layout_below="@+id/productNameDetail"
+        android:layout_margin="0dp"/>
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/productPriceDetail"
+        android:layout_centerHorizontal="true"
+        android:text="Add to basket"
+        android:gravity="center"
+        android:background="@color/teal_700"
+        android:layout_marginTop="20dp"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigationViewBottom"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:fitsSystemWindows="true"
+        app:itemBackground="@color/white"
+        app:itemIconTint="@color/black"
+        app:itemTextColor="@color/black"
+        android:gravity="bottom"
+        app:labelVisibilityMode="unlabeled"
+        app:menu="@menu/bottom_main_menu"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>
