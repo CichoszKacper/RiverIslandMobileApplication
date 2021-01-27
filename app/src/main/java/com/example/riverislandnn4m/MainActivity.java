@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +38,16 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     SearchView searchview;
     TextView noResults;
+    LinearLayoutManager layoutManager;
+
+    private int previousTotal = 0;
+    private int view_threshold = 10;
+
+    private int firstItemVisible = 0;
+    private int lastItemVisible = 10;
+
+    private boolean mLoadingItems = true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
         searchview.setFocusable(true);
         noResults = findViewById(R.id.noResults);
 
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
         mQueue = Volley.newRequestQueue(this);
 
         //Disabling the detection of everything in ThreadPolicy
@@ -58,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
         jsonParse();
         initSearchWidget();
         startBottomNavigationBar();
+        pagination();
+
     }
 
     //Method to disable automatic keyboard on start of the activity
@@ -80,8 +96,9 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         JSONArray products =  response.getJSONArray("Products");
 
-                        //Iterating over the list of products in JSON file
-                        for(int i = 0; i < products.length(); i++){
+                        //Iterating over the list of products in JSON file, using first visible item
+                        //and last visible item variables from scroll listener
+                        for(int i = firstItemVisible; i < lastItemVisible; i++){
                             JSONObject product = products.getJSONObject(i);
 
                             //Extracting the needed data
@@ -101,31 +118,25 @@ public class MainActivity extends AppCompatActivity {
 
                             //Adding the product to the Array with products
                             listOfProducts.add(newProduct);
-
-
                         }
+
                     } catch (JSONException | IOException e) {
                         e.printStackTrace();
                     }
 
                     //Running method to add the adapter
-                    addAdapter();
+                    if(recyclerView.getAdapter()==null) {
+                        //New adapter if starting
+                        productAdapter = new Adapter(this, listOfProducts);
+                        recyclerView.setAdapter(productAdapter);
+                    }
+                    else{
+                        productAdapter.notifyDataSetChanged(); //notifies View reflecting data to refresh
+                    }
 
 
                 }, Throwable::printStackTrace);
         mQueue.add(request);
-    }
-
-    //Method to add adapter to recyclerview
-    public void addAdapter(){
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-
-        productAdapter = new Adapter(this,listOfProducts);
-
-        recyclerView.setAdapter(productAdapter);
-
-
     }
 
     //Method to initialize the Search bar
@@ -190,6 +201,42 @@ public class MainActivity extends AppCompatActivity {
             //TODO listeners for the rest of sections once created
 
             return false;
+        });
+    }
+
+    //Method to help to load only 10 products at once, using scroll listener
+    private void pagination(){
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (dy>0){
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    int lastItem  = layoutManager.findLastCompletelyVisibleItemPosition(); //finds last visible item
+                    int currentTotalCount = layoutManager.getItemCount(); //find total number of displayed items
+
+                    if (mLoadingItems){
+                        if (currentTotalCount > previousTotal){
+                            mLoadingItems = false;
+                            previousTotal = currentTotalCount;
+                        }
+                    }
+                    if (!mLoadingItems && (currentTotalCount <= (lastItem +view_threshold))) {
+                        mLoadingItems = true;
+                        //Increment number of items on the list
+                        firstItemVisible = firstItemVisible+10;
+                        lastItemVisible = lastItemVisible+10;
+                        //Update adapter
+                        jsonParse();
+                    }
+                }
+            }
         });
     }
 }
